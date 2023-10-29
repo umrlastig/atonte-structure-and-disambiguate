@@ -1,0 +1,58 @@
+﻿PREFIX fun: <http://w3id.org/sparql-generate/fn/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX iter: <http://w3id.org/sparql-generate/iter/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX atln: <http://data.shom.fr/def/atlantis#>
+PREFIX inp: <http://data.shom.fr/id/inparagraph/>
+PREFIX ent: <http://data.shom.fr/id/spatialentity/>
+PREFIX tse: <http://data.shom.fr/id/codes/atln/typeofspatialentity/>
+PREFIX feat: <http://data.shom.fr/id/geographicfeature/>
+
+##### WHAT THIS SCRIPT DOES #####
+
+# Creates an instance for each document with a unique ID
+## Captures the first part of the text
+
+# Creates an instance for each geographic feature, whether unnamed or part of a named geographic entity, with a unique ID
+## Captures feature type
+## Captures source paragraph
+
+# Creates an instance for each named geographic entity with a unique ID
+## Captures feature type
+## Captures source paragraph
+## Captures ID of feature
+
+GENERATE {
+   <http://data.shom.fr/id/inparagraph/{?docID}> a atln:INPara.
+
+   <http://data.shom.fr/id/spatialentity/{?entID}> a atln:SpatialEntity;
+   atln:hasTypeOfSpatialEntity <http://data.shom.fr/id/codes/atln/typeofspatialentity/{?tse}>;
+   nav:hasFeatId <http://data.shom.fr/id/geographicfeature/{?featID}>;
+   atln:hasSource <http://data.shom.fr/id/inparagraph/{?docID}>.
+
+   <http://data.shom.fr/id/geographicfeature/{?uEntID}> a atln:SpatialEntity;
+   atln:hasTypeOfSpatialEntity <http://data.shom.fr/id/codes/atln/typeofspatialentity/{?uTse}>;
+   atln:hasSource <http://data.shom.fr/id/inparagraph/{?docID}>.
+}
+
+SOURCE <http://input.xml> AS ?source
+
+ITERATOR iter:XPath(?source,"//doc") AS ?document
+ITERATOR iter:XPath(?document,"//geogName") AS ?geogName
+ITERATOR iter:XPath(?document,"//geogFeat") AS ?geogFeat
+
+WHERE{
+  BIND( STR(fun:XPath(?document,"/doc/@id")) AS ?docID)
+  BIND( fun:XPath(?document,"/doc/text()") AS ?textStarts)
+
+  BIND( STR(fun:XPath(?geogName,"/geogName/@id")) AS ?geogNameID)
+  BIND( CONCAT(?docID, "_span_", ?geogNameID) AS ?entID)
+  BIND( STR(fun:XPath(?geogName,"/geogName/geogFeat/@id")) AS ?geogFeatID)
+  BIND( CONCAT(?docID, "_span_", ?geogFeatID) AS ?featID)
+  BIND( fun:XPath(?geogName,"/geogName/geogFeat/text()"  ) AS ?tse )
+
+  BIND( STR(fun:XPath(?geogFeat,"/geogFeat/@id")) AS ?uFeatID)
+  BIND( CONCAT(?docID, "_span_", ?uFeatID) AS ?uEntID)
+  BIND( fun:XPath(?geogFeat,"/geogFeat/text()"  ) AS ?uTse )
+}

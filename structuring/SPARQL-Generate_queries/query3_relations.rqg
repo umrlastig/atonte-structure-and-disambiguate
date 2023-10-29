@@ -1,0 +1,41 @@
+﻿PREFIX fun: <http://w3id.org/sparql-generate/fn/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX iter: <http://w3id.org/sparql-generate/iter/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX atln: <http://data.shom.fr/def/atlantis#>
+PREFIX inp: <http://data.shom.fr/id/inparagraph/>
+PREFIX ent: <http://data.shom.fr/id/spatialentity/>
+PREFIX tse: <http://data.shom.fr/id/codes/atln/typeofspatialentity/>
+PREFIX feat: <http://data.shom.fr/id/geographicfeature/>
+
+##### WHAT THIS SCRIPT DOES #####
+
+# Creates an instance for each document with a unique ID
+
+# Creates an instance for each geographic entity cited within a relation, with a unique ID
+## Creates a relation between the two concerned instances
+
+GENERATE {
+   <http://data.shom.fr/id/inparagraph/{?docID}> a atln:INPara.
+
+   <http://data.shom.fr/id/spatialentity/{?relLID}> a atln:SpatialEntity;
+   <http://data.shom.fr/def/atlantis#is{?relationType}> <http://data.shom.fr/id/spatialentity/{?relRID}>.
+
+   <http://data.shom.fr/id/spatialentity/{?relRID}> a atln:SpatialEntity.
+}
+
+SOURCE <http://input.xml> AS ?source
+
+ITERATOR iter:XPath(?source,"//doc") AS ?document
+ITERATOR iter:XPath(?document,"//relation") AS ?relation
+
+WHERE{
+  BIND( STR(fun:XPath(?document,"/doc/@id")) AS ?docID)
+
+  BIND( STR(fun:XPath(?relation,"/relation/@L")) AS ?relL)
+  BIND( CONCAT(?docID, "_span_", ?relL) AS ?relLID)
+  BIND( STR(fun:XPath(?relation,"/relation/@R")) AS ?relR)
+  BIND( CONCAT(?docID, "_span_", ?relR) AS ?relRID)
+  BIND( fun:XPath(?relation,"/relation/text()") AS ?relationType)
+}

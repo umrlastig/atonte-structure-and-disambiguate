@@ -1,0 +1,34 @@
+REFIX fun: <http://w3id.org/sparql-generate/fn/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX iter: <http://w3id.org/sparql-generate/iter/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX atln: <http://data.shom.fr/def/atlantis#>
+PREFIX inp: <http://data.shom.fr/id/inparagraph/>
+PREFIX ent: <http://data.shom.fr/id/spatialentity/>
+PREFIX tse: <http://data.shom.fr/id/codes/atln/typeofspatialentity/>
+
+##### WHAT THIS SCRIPT DOES #####
+
+# Creates an instance for each named geographic entity with a unique ID
+## Captures document of provenance
+## Captures full name
+
+GENERATE {
+   <http://data.shom.fr/id/spatialentity/{?entID}> a atln:SpatialEntity;
+   rdfs:label ?fullName;
+   atln:hasSource <http://data.shom.fr/id/inparagraph/{?docID}>.
+}
+
+SOURCE <http://input.xml> AS ?source
+
+ITERATOR iter:XPath(?source,"//doc") AS ?document
+ITERATOR iter:XPath(?document,"//geogName") AS ?geogName
+
+WHERE{
+  BIND( STR(fun:XPath(?document,"/doc/@id")) AS ?docID)
+
+  BIND( STR(fun:XPath(?geogName,"/geogName/@id")) AS ?geogNameID)
+  BIND( CONCAT(?docID, "_span_", ?geogNameID) AS ?entID)
+  BIND( fun:XPath(?geogName,"/geogName/text()"  ) AS ?fullName )
+}
