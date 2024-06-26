@@ -24,5 +24,9 @@ For more information, please see https://theses.hal.science/tel-04599846, page 1
 ## Acknowledgements
 This work was co-financed by the Shom and the IGN and was carried out at the LASTIG, a research unit at Université Gustave Eiffel.
 
+Contributors for the Structuring code: Léa Lamotte, Nathalie Abadie, Helen Rawsthorne
+
+Contributors for the Disambiguation code: Mayeul de Loynes, Romain Ruiz, Nathalie Abadie, Helen Rawsthorne
+
 ## Licence
 The content of this repository is licenced under the Etalab Open License Version 2.0 and the CC BY 4.0 licence.
